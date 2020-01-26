@@ -54,12 +54,6 @@ try:
 		time.sleep(3)
 
 		print(response)
-	
-	
-	
-	
-	
-	
 
 except Exception as e:
 	raise e
