@@ -12,11 +12,10 @@ def lambda_handler(event, context):
 
     try:
 		
-		# Iterate through each SQS message
+	# Iterate through each SQS message
         for rec in event['Records']:
             #print('I got Triggered!')
-			
-			# Process each SQS message and insert into the Orders Table in dynamodb
+		# Process each SQS message and insert into the Orders Table in dynamodb
             dynamoTable.put_item(Item=json.loads(rec['body']) )
             
             
