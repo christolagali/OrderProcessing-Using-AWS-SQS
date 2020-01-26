@@ -2,13 +2,16 @@ import boto3
 import pandas as pd
 import time
 import json
+import sys,os,inspect
+from pathlib import Path  
+from os import path
 
-
-def getQueue():
+sqs = boto3.client('sqs',region_name='us-east-2')
+def getQueue(queuename):
 	
 	try:
-		sqs = boto3.client('sqs',region_name='us-east-2')
-		queue = sqs.get_queue_url(QueueName='OrderQueue')
+		
+		queue = sqs.get_queue_url(QueueName=queuename)
 		
 		return queue
 	
@@ -18,13 +21,22 @@ def getQueue():
 
 try:
 	# read data from file
-	data = pd.read_csv('/home/ec2-user/sales_data_sample.csv')
+	basepath = path.dirname(__file__)
+	filepath = path.abspath(path.join(basepath, "..", "/data/","sales_data_sample.csv"))
+	#print(filepath)
+	#Path(filepath).name
+	data = pd.read_csv('sales_data_sample.csv')
 	
 	dataDict = dict()
 	
-	queue = getQueue()
+	queue = getQueue('OrderQueue')
 	
 	# emulate a producer by sending json data with a 3 second gap/delay
+
+	"""
+		For Demonstartion purposes we are sending the first 5 rows.
+		Modify the range in the for loop to increase the no of rows to send.
+	"""
 	
 	for i in range(0,5):
 	
@@ -37,9 +49,10 @@ try:
 		dataDict['COUNTRY'] = data.iloc[i]['COUNTRY']
     
 		response = sqs.send_message(QueueUrl= queue['QueueUrl'], MessageBody=json.dumps(dataDict))
-    
+
+		# Using time module to add a delay of 3 seconds to emulate orders coming into SQS
 		time.sleep(3)
-    
+
 		print(response)
 	
 	
